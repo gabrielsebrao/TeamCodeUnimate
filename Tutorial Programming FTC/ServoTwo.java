@@ -1,0 +1,94 @@
+//Copyright (c) 2017 FIRST. All rights reserved.
+
+package Youtube;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
+
+/** Configuration File
+ *  Control Hub:
+ *  Port 00: servoOne
+ *  Port 01: servoTwo
+ */
+
+@TeleOp(group="Primary")
+@Disabled
+public class ServoTwo extends LinearOpMode
+{
+
+    private Servo servoOne;
+    private double servoOneInitPosition = 0.0;
+    private double servoOnePositionOne = 0.5;
+    private double servoOnePositionTwo = 1.0;
+    private int servoOneDelay = 10;
+
+    private Servo servoTwo;
+    private double servoTwoInitPosition = 0.50;
+    private double servoTwoSensitivity = 1.0;
+
+    @Override
+    public void runOpMode() throws InterruptedException{
+        initHardware();
+        while(!isStarted()) {
+            servoOneTelemetry();
+        }
+        waitForStart();
+        while(opModeIsActive()) {
+            servoOneTelemetry();
+        }
+
+    }
+
+    public void runOpModeControls() {
+        if(gamepad1.a) {
+            servoOne.setPosition(servoOnePositionOne);
+        }
+        if(gamepad1.b) {
+            servoOne.setPosition(servoOnePositionTwo);
+        }
+        if(gamepad1.right_bumper) {
+            servoOneSlower(servoOnePositionTwo, servoOnePositionOne, servoOneDelay);
+        }
+
+        servoTwo.setPosition(servoTwoInitPosition + (gamepad1.right_stick_y * servoTwoSensitivity));
+    }
+
+    public void servoOneSlower(double endPosition, double startPosition, int delay) {
+        double range = ((endPosition - startPosition) * 100);
+        for(int i = 0; i <= range; i++) {
+            servoOne.setPosition(startPosition);
+            sleep(delay);
+            startPosition += 0.01;
+        }
+    }
+
+    public void initHardware() {
+        initServoOne();
+        initServoTwo();
+    }
+
+    public void initServoOne() {
+        servoOne = hardwareMap.get(Servo.class, "servoOne");
+        servoOne.setDirection(Servo.Direction.REVERSE);
+        servoOne.setPosition(servoOneInitPosition);
+    }
+
+    public void initServoTwo() {
+        servoTwo = hardwareMap.get(Servo.class, "servoTwo");
+        servoTwo.setDirection(Servo.Direction.REVERSE);
+        servoTwo.setPosition(servoTwoInitPosition);
+    }
+
+    public void servoOneTelemetry() {
+        telemetry.addData("Servo One", null);
+        telemetry.addData("Position: ", servoOne.getPosition());
+        telemetry.addData("Direction: ", servoOne.getDirection());
+
+        telemetry.addData("Servo Two", null);
+        telemetry.addData("Position: ", servoTwo.getPosition());
+        telemetry.addData("Direction: ", servoTwo.getDirection());
+        telemetry.update();
+    }
+}
