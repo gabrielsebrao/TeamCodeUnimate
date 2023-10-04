@@ -3,33 +3,26 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-/** Configuration
- * Control Hub:
- * Motor Port 00: motorEsquerda
- * Motor Port 01: motorDireita
- * Motor Port 02: motorGarra
- */
-
-@TeleOp(name="Complete TeleOp", group="TeleOp Mode")
+@Autonomous(name="Autonomous Left and Right Motors", group="Autonomous Mode")
 //@Disabled
-public class MainOpMode extends OpMode
+public class LeftRightMotors extends OpMode
 {
     // Declare OpMode variables
     private ElapsedTime runtime = new ElapsedTime();
 
     private DcMotor leftMotor = null;
-    private double leftMotorPower = 0;
+    private double leftMotorPower = 1.0;
+    private double leftMotorInitPosition = 0;
 
     private DcMotor rightMotor = null;
-    private double rightMotorPower = 0;
-
-    private DcMotor clawMotor = null;
-    private int clawMotorPower = 0;
+    private double rightMotorPower = 1.0;
+    private double rightMotorInitPosition = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -59,32 +52,49 @@ public class MainOpMode extends OpMode
     }
 
     public void runTeleOpControls() {
-
-        // Set left and right motors power
-        double drive = gamepad1.left_stick_y;
-        double turn  = -gamepad1.right_stick_x;
-        leftMotorPower = Range.clip(drive + turn, -1.00, 1.00) ;
-        rightMotorPower = Range.clip(drive - turn, -1.00, 1.00) ;
-        leftMotor.setPower(leftMotorPower);
-        rightMotor.setPower(rightMotorPower);
-
-        // Set claw motor power
-        if(gamepad1.a) {
-            clawMotorPower = 1;
-        } else {
-            clawMotorPower = 0;
+        // Motors go to specif position
+        leftMotor.setTargetPosition(1000);
+        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftMotor.setPower(1);
+        if(!leftMotor.isBusy()) {
+            leftMotor.setPower(0);
         }
-        clawMotor.setPower(clawMotorPower);
+
+        rightMotor.setTargetPosition(1000);
+        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightMotor.setPower(1);
+        if(!rightMotor.isBusy()) {
+            rightMotor.setPower(0);
+        }
+    }
+
+    public void runLeftMotorToPosition(int position) {
+        leftMotor.setTargetPosition(position);
+        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftMotor.setPower(0.2);
+        while(leftMotor.isBusy()) {
+            showTelemetry();
+        }
+        leftMotor.setPower(0); // optional
+    }
+
+    public void runRightMotorToPosition(int position) {
+        rightMotor.setTargetPosition(position);
+        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightMotor.setPower(0.2);
+        while(rightMotor.isBusy()) {
+            showTelemetry();
+        }
+        rightMotor.setPower(0); // optional
     }
 
     public void initHardware() {
         initLeftMotor();
         initRightMotor();
-        initClawMotor();
     }
 
     public void initLeftMotor() {
-        leftMotor = hardwareMap.get(DcMotor.class, "motorEsquerda");
+        leftMotor = hardwareMap.get(DcMotor.class, "MotorRod1");
         leftMotor.setDirection(DcMotor.Direction.REVERSE);
         leftMotor.setPower(0);
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -93,7 +103,7 @@ public class MainOpMode extends OpMode
     }
 
     public void initRightMotor() {
-        rightMotor = hardwareMap.get(DcMotor.class, "motorDireita");
+        rightMotor = hardwareMap.get(DcMotor.class, "MotorRod2");
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
         rightMotor.setPower(0);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -101,17 +111,12 @@ public class MainOpMode extends OpMode
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
-    public void initClawMotor() {
-        clawMotor = hardwareMap.get(DcMotor.class, "motorGarra");
-        clawMotor.setDirection(DcMotor.Direction.FORWARD);
-    }
-
     public void showTelemetry() {
 
         // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftMotorPower, rightMotorPower);
-        telemetry.addData("clawMotor", "(%.2f)", clawMotorPower);
+        telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftMotor.getPower(), leftMotor.getPower());
+        telemetry.addData("Left Motor Position", "Current Position: ", leftMotor.getCurrentPosition());
         telemetry.update();
 
     }
