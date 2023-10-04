@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.util.Range;
  * Motor Port 00: motorEsquerda
  * Motor Port 01: motorDireita
  * Motor Port 02: motorGarra
+ * Servo Port 00: servoClaw
  */
 
 @TeleOp(name="Complete TeleOp", group="TeleOp Mode")
@@ -77,12 +78,14 @@ public class MainOpMode extends OpMode
         clawMotor.setPower(clawMotorPower);
     }
 
+    // Inits all hardware members
     public void initHardware() {
         initLeftMotor();
         initRightMotor();
         initClawMotor();
     }
 
+    // Inits the left motor
     public void initLeftMotor() {
         leftMotor = hardwareMap.get(DcMotor.class, "motorEsquerda");
         leftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -92,6 +95,7 @@ public class MainOpMode extends OpMode
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    // Inits the right motor
     public void initRightMotor() {
         rightMotor = hardwareMap.get(DcMotor.class, "motorDireita");
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -101,14 +105,14 @@ public class MainOpMode extends OpMode
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
+    // Inits the claw motor
     public void initClawMotor() {
         clawMotor = hardwareMap.get(DcMotor.class, "motorGarra");
         clawMotor.setDirection(DcMotor.Direction.FORWARD);
     }
 
+    // Show telemetry data
     public void showTelemetry() {
-
-        // Show the elapsed game time and wheel power.
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftMotorPower, rightMotorPower);
         telemetry.addData("clawMotor", "(%.2f)", clawMotorPower);
